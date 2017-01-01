@@ -1,0 +1,112 @@
+/* Common */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+.App__header {
+  background-color: #222;
+  color: #fff;
+}
+
+.App__title {
+  display: inline-block;
+  margin-left: -120px;
+}
+
+.App__logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+  float: left;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Helpres */
+.hidden {
+  display: none;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.center {
+  text-align: center;
+}
+
+.card {
+    position: relative;
+    background-color: #fff;
+    transition: box-shadow .25s;
+    border-radius: 2px;
+}
+
+/*.grid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.cell {
+  display: inline-block;
+  width: 150px;
+  height: 150px;
+  border-radius: 75px;
+  opacity: .75;
+  background-color: #aaa;
+  box-shadow: 2px 2px 0px #888888;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.cell-p1 {
+  @extend .cell;
+  background-color: white;
+  cursor: default;
+}
+
+.cell-p2 {
+  @extend .cell;
+  background-color: black;
+  cursor: default;
+}
+
+.announcement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  left: 20%;
+  right: 20%;
+
+  border-radius: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  font-size: 2em;
+  color: white;
+
+  button {
+    height: 50px;
+    width: 100px;
+
+    font-size: 0.5em;
+    font-weight: bold;
+
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    color: purple;
+  }
+}*/
