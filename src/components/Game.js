@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import Timer from 'react-timer';
 import Header from './Header';
 import Announcement from './Announcement';
 import Board from './Board';
@@ -36,8 +35,6 @@ class Game extends Component {
   }
 
   render() {
-    //let timerOptions = { prefix: 'seconds elapsed!', delay: 100}
-
     return (
       <div className="App center">
         <Header message="Tic Tac Toe"/>

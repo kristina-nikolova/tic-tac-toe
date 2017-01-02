@@ -20,7 +20,8 @@ class Board extends Component {
         currentPlayer: 'x',
         maxPlayer: 'x',
         minPlayer: 'o',
-        gameOverMessage: 'Game over!'
+        gameOverMessage: 'Game over!',
+        winningPath: [null, null, null]
       }
   }
 
@@ -40,7 +41,8 @@ class Board extends Component {
         currentPlayer: 'x',
         maxPlayer: 'x',
         minPlayer: 'o',
-        gameOverMessage: 'Game over!'
+        gameOverMessage: 'Game over!',
+        winningPath: []
       }, function(){
         this.props.resetGameHandler(this.state.winner, this.state.gameOverMessage);
       });
@@ -52,8 +54,9 @@ class Board extends Component {
    * @params player {String}
    * @desc Check for winner
   */
-  winner(board, player){
-    if (
+  winner(board, player) {   
+
+    if (    
            (board[0] === player && board[1] === player && board[2] === player) ||
            (board[3] === player && board[4] === player && board[5] === player) ||
            (board[6] === player && board[7] === player && board[8] === player) ||
@@ -62,7 +65,6 @@ class Board extends Component {
            (board[2] === player && board[5] === player && board[8] === player) ||
            (board[0] === player && board[4] === player && board[8] === player) ||
            (board[2] === player && board[4] === player && board[6] === player)
-
           ) {
           return true;
       } else {
@@ -76,11 +78,22 @@ class Board extends Component {
    * @desc Check for Tie Game
   */
   tie(board) {
-    var moves = board.join('').replace(/ /g, '');
+    /**
+    ** Set all not empty tiles into moves object
+    **/
+    let moves = board.join('').replace(/ /g, '');
     if (moves.length === 9) {
       return true;
     }
     return false;
+  }
+
+  checkForWinningPath(board, i1, i2, i3, player) {
+    if (board[i1] === player && board[i2] === player && board[i3] === player) {
+      this.setState({
+        winningPath: [i1, i2, i3]
+      });
+    }
   }
 
   /**
@@ -90,6 +103,7 @@ class Board extends Component {
    * @desc Check if game is over
   */
   isGameOver(board, player) {
+
     if (this.winner(board, player)) {
       this.setState({
         gameBoard: board,
@@ -100,6 +114,18 @@ class Board extends Component {
         ** Update winner and message in the parent state
         **/
         this.props.gameOverHandler(this.state.winner, this.state.gameOverMessage);
+
+        /**
+        ** Get winning path to highligh it
+        **/
+        this.checkForWinningPath(board, 0, 1, 2, player);
+        this.checkForWinningPath(board, 3, 4, 5, player);
+        this.checkForWinningPath(board, 6, 7, 8, player);
+        this.checkForWinningPath(board, 0, 3, 6, player);
+        this.checkForWinningPath(board, 1, 4, 7, player);
+        this.checkForWinningPath(board, 2, 5, 8, player);
+        this.checkForWinningPath(board, 0, 4, 8, player);
+        this.checkForWinningPath(board, 2, 4, 6, player);
       });
 
       return;
@@ -135,7 +161,11 @@ class Board extends Component {
    * @params board {Object}
    * @desc Determine if a move is valid and return the new board state
   */
-  validMove(move, player, board){
+  validMove(move, player, board) {
+    if((this.winner(board, 'x') || this.winner(board, 'o') || this.tie(board))) {
+      return null;
+    }
+
     let newBoard = this.copyBoard(board);
 
     if(newBoard[move] === ' '){
@@ -154,7 +184,7 @@ class Board extends Component {
     let bestMoveScore = 100;
     let move = null;
     
-    if(this.winner(board, 'x') || this.winner(board, 'o' || this.tie(board))) {
+    if((this.winner(board, 'x') || this.winner(board, 'o') || this.tie(board))) {
       return null;
     }
 
@@ -219,32 +249,36 @@ class Board extends Component {
     let player = this.state.currentPlayer;
 
     /**
-    ** Set player move
+    ** Set player move and if no winner and it is valid change the turn
     **/
     let currentGameBoard = this.validMove(move, player, this.state.gameBoard);
 
-    this.isGameOver(currentGameBoard, player);
+    if (currentGameBoard) {
+      this.isGameOver(currentGameBoard, player);
 
-    /**
-    ** Set AI move
-    **/
-    player = 'o';
-    currentGameBoard = this.validMove(this.getAiMove(currentGameBoard), player, currentGameBoard);
+      /**
+      ** Set AI move and if no winner and it is valid update the state
+      **/
+      player = 'o';
+      currentGameBoard = this.validMove(this.getAiMove(currentGameBoard), player, currentGameBoard);
 
-    this.isGameOver(currentGameBoard, player);
+      if (currentGameBoard) {
+        this.isGameOver(currentGameBoard, player);
 
-    /**
-    ** Update current state of the board
-    **/
-    this.setState({
-        gameBoard: currentGameBoard
-      });
+        /**
+        ** Update current state of the board
+        **/
+        this.setState({
+            gameBoard: currentGameBoard
+          });
+      }  
+    } 
   }
 
   render() {
     return (
       <div>
-          <ResetButton reset={this.resetBoard.bind(this)}/>
+          <ResetButton reset={this.resetBoard.bind(this)} winningPath={this.state.winningPath} />
           <div className="board">
             {this.state.gameBoard.map(function(value, i){
               return (
@@ -252,6 +286,7 @@ class Board extends Component {
                   key={i}
                   loc={i}
                   value={value}
+                  winningPath={this.state.winningPath}
                   updateBoard={this.updateBoard.bind(this)} />
               );
             }.bind(this))}
