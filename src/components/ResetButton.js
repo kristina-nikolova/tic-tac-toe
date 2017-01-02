@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import '../styles/components/ResetButton.scss';
 
 class ResetButton extends Component {
   /**
@@ -7,7 +8,7 @@ class ResetButton extends Component {
 
   render() {
     return (
-      <button className="board__button-reset" onClick={this.props.reset}>Reset</button>
+      <button className="button--reset" onClick={this.props.reset}>Reset</button>
     )
   }
 }

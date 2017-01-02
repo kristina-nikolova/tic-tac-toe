@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import logo from '../assets/logo.svg';
-import '../styles/Board.scss';
-// import Clock from './Clock';
-import Announcement from './Announcement';
+import '../styles/components/Board.scss';
 import Tile from './Tile';
 import ResetButton from './ResetButton';
 
 class Board extends Component {
-  constructor() {
-      super();
+  /**
+   * @props gameOverHandler()
+   * @props resetGameHandler()
+   */
+  constructor(props) {
+      super(props);
       this.state = {
         gameBoard: [
           ' ',' ',' ',
@@ -16,7 +17,7 @@ class Board extends Component {
           ' ',' ',' '
         ],
         winner: null,
-        turn: 'x',
+        currentPlayer: 'x',
         maxPlayer: 'x',
         minPlayer: 'o',
         gameOverMessage: 'Game over!'
@@ -36,10 +37,12 @@ class Board extends Component {
           ' ',' ',' '
         ],
         winner: null,
-        turn: 'x',
+        currentPlayer: 'x',
         maxPlayer: 'x',
         minPlayer: 'o',
         gameOverMessage: 'Game over!'
+      }, function(){
+        this.props.resetGameHandler(this.state.winner, this.state.gameOverMessage);
       });
   }
 
@@ -47,18 +50,19 @@ class Board extends Component {
    * @name winner
    * @params board {Object}
    * @params player {String}
-   * @desc Test for winner
+   * @desc Check for winner
   */
   winner(board, player){
     if (
-          (board[0] === player && board[1] === player && board[2] === player) ||
-          (board[3] === player && board[4] === player && board[5] === player) ||
-          (board[6] === player && board[7] === player && board[8] === player) ||
-          (board[0] === player && board[3] === player && board[6] === player) ||
-          (board[1] === player && board[4] === player && board[7] === player) ||
-          (board[2] === player && board[5] === player && board[8] === player) ||
-          (board[0] === player && board[4] === player && board[8] === player) ||
-          (board[2] === player && board[4] === player && board[6] === player)
+           (board[0] === player && board[1] === player && board[2] === player) ||
+           (board[3] === player && board[4] === player && board[5] === player) ||
+           (board[6] === player && board[7] === player && board[8] === player) ||
+           (board[0] === player && board[3] === player && board[6] === player) ||
+           (board[1] === player && board[4] === player && board[7] === player) ||
+           (board[2] === player && board[5] === player && board[8] === player) ||
+           (board[0] === player && board[4] === player && board[8] === player) ||
+           (board[2] === player && board[4] === player && board[6] === player)
+
           ) {
           return true;
       } else {
@@ -67,9 +71,9 @@ class Board extends Component {
   }
 
   /**
-   * @name winner
+   * @name tie
    * @params board {Object}
-   * @desc Test for Tie Game
+   * @desc Check for Tie Game
   */
   tie(board) {
     var moves = board.join('').replace(/ /g, '');
@@ -79,20 +83,38 @@ class Board extends Component {
     return false;
   }
 
+  /**
+   * @name isGameOver
+   * @params board {Object}
+   * @params player {String}
+   * @desc Check if game is over
+  */
   isGameOver(board, player) {
     if (this.winner(board, player)) {
       this.setState({
         gameBoard: board,
         winner: player,
         gameOverMessage: player === 'x' ? 'You win!' : 'You lose!'
+      }, function() {
+        /**
+        ** Update winner and message in the parent state
+        **/
+        this.props.gameOverHandler(this.state.winner, this.state.gameOverMessage);
       });
+
       return;
     }
     if (this.tie(board)) {
       this.setState({
         gameBoard: board,
-        winner: 'd'
+        winner: 'no winner'
+      }, function() {
+        /**
+        ** Update winner and message in the parent state
+        **/
+        this.props.gameOverHandler(this.state.winner, this.state.gameOverMessage);
       });
+
       return;
     }
   }
@@ -108,13 +130,14 @@ class Board extends Component {
 
   /**
    * @name validMove
-   * @params move {}
+   * @params move {String}
    * @params player {String}
    * @params board {Object}
    * @desc Determine if a move is valid and return the new board state
   */
   validMove(move, player, board){
-    var newBoard = this.copyBoard(board);
+    let newBoard = this.copyBoard(board);
+
     if(newBoard[move] === ' '){
       newBoard[move] = player;
       return newBoard;
@@ -122,18 +145,28 @@ class Board extends Component {
       return null;
   }
 
-  findAiMove(board) {
+  /**
+   * @name getAiMove
+   * @params board {Object}
+   * @desc Find the best move for AI base on the miniMax algorithm
+  */
+  getAiMove(board) {
     let bestMoveScore = 100;
     let move = null;
-    //Test Every Possible Move if the game is not already over.
+    
     if(this.winner(board, 'x') || this.winner(board, 'o' || this.tie(board))) {
       return null;
     }
+
+    /**
+    ** Test Every Possible Move if the game is not already over.
+    **/
     for(var i = 0; i < board.length; i++){
       let newBoard = this.validMove(i, this.state.minPlayer, board);
-      //If validMove returned a valid game board
+      /**
+      ** If validMove returned a valid game board find the best move for AI (maxScore)
+      **/
       if(newBoard) {
-        //get maxScore
         var moveScore = this.miniMaxAlgorithm(newBoard, false, true);
         if (moveScore < bestMoveScore) {
           bestMoveScore = moveScore;
@@ -144,6 +177,13 @@ class Board extends Component {
     return move;
   }
 
+  /**
+   * @name miniMaxAlgorithm
+   * @params board {Object}
+   * @params min {Bool}
+   * @params max {Bool}
+   * @desc 
+  */
   miniMaxAlgorithm(board, min, max) {
     if (this.winner(board, 'x')) {
       return 10;
@@ -170,107 +210,53 @@ class Board extends Component {
     }
   }
 
-  gameLoop(move) {
-    let player = this.state.turn;
+  /**
+   * @name updateBoard
+   * @params move {String}
+   * @desc Find AI move after every player move and update the board
+  */
+  updateBoard(move) {
+    let player = this.state.currentPlayer;
+
+    /**
+    ** Set player move
+    **/
     let currentGameBoard = this.validMove(move, player, this.state.gameBoard);
 
     this.isGameOver(currentGameBoard, player);
 
+    /**
+    ** Set AI move
+    **/
     player = 'o';
-    currentGameBoard = this.validMove(this.findAiMove(currentGameBoard), player, currentGameBoard);
+    currentGameBoard = this.validMove(this.getAiMove(currentGameBoard), player, currentGameBoard);
 
     this.isGameOver(currentGameBoard, player);
 
+    /**
+    ** Update current state of the board
+    **/
     this.setState({
         gameBoard: currentGameBoard
       });
   }
 
-  // updateBoard(loc, player) {
-  //   /**
-  //   ** if the game is over show announcement
-  //   **/
-  //   if(this.state.winner !== null) {
-  //     return;
-  //   }
-
-  //   /**
-  //   ** Invalid move when the selected cell is not empty
-  //   **/
-  //   if(this.state.gameBoard[loc] === 'x' || this.state.gameBoard[loc] === 'o') {
-  //     return;
-  //   }
-
-  //   let currentGameBoard = this.state.gameBoard;
-  //   currentGameBoard.splice(loc, 1, this.state.turn);
-
-  //   this.setState({gameBoard: currentGameBoard}, function() {
-  //     /**
-  //     ** If all cells are filled there is no winner and the game is over
-  //     ** If there is empty cells check if there is a winner
-  //     **/
-  //     let moves = this.state.gameBoard.join('').replace(/ /g,'');
-
-  //     if(moves.length === 9) {
-  //       this.setState({winner: 'd'});
-  //       return;
-  //     } else {
-
-  //       let topRow = this.state.gameBoard[0] + this.state.gameBoard[1] + this.state.gameBoard[2];
-  //       let middleRow = this.state.gameBoard[3] + this.state.gameBoard[4] + this.state.gameBoard[5];
-  //       let bottomRow = this.state.gameBoard[6] + this.state.gameBoard[7] + this.state.gameBoard[8];
-  //       let leftCol = this.state.gameBoard[0] + this.state.gameBoard[3] + this.state.gameBoard[6];
-  //       let middleCol = this.state.gameBoard[1] + this.state.gameBoard[4] + this.state.gameBoard[7];
-  //       let rightCol = this.state.gameBoard[2] + this.state.gameBoard[5] + this.state.gameBoard[8];
-  //       let leftDiag = this.state.gameBoard[0] + this.state.gameBoard[4] + this.state.gameBoard[8];
-  //       let rightDiag = this.state.gameBoard[2] + this.state.gameBoard[4] + this.state.gameBoard[6];
-
-  //       this.checkForWinner(topRow);
-  //       this.checkForWinner(middleRow);
-  //       this.checkForWinner(bottomRow);
-  //       this.checkForWinner(leftCol);
-  //       this.checkForWinner(middleCol);
-  //       this.checkForWinner(rightCol);
-  //       this.checkForWinner(leftDiag);
-  //       this.checkForWinner(rightDiag);
-  //       /**
-  //       ** Change players` order
-  //       **/
-  //       this.setState({turn: (this.state.turn === 'x') ? 'o' : 'x' });
-  //     }
-  //   }, this);
-  // }
-
-  // checkForWinner(elements) {
-  //   if(elements.match(/xxx|ooo/)){
-  //     this.setState({winner: this.state.turn});
-  //     return;
-  //   }
-  // }
-
   render() {
     return (
-      <div className="App center">
-          <div className="App__header">
-            <img src={logo} className="App__logo" alt="logo" />
-            <h1 className="App__title">Tic Tac Toe</h1>
+      <div>
+          <ResetButton reset={this.resetBoard.bind(this)}/>
+          <div className="board">
+            {this.state.gameBoard.map(function(value, i){
+              return (
+                <Tile
+                  key={i}
+                  loc={i}
+                  value={value}
+                  updateBoard={this.updateBoard.bind(this)} />
+              );
+            }.bind(this))}
           </div>
-          <div className="App__content">
-            <Announcement winner={this.state.winner} message={this.state.gameOverMessage} />
-            <ResetButton reset={this.resetBoard.bind(this)}/>
-            <div className="board__container">
-              {this.state.gameBoard.map(function(value, i){
-                return (
-                  <Tile
-                    key={i}
-                    loc={i}
-                    value={value}
-                    gameLoop={this.gameLoop.bind(this)} />
-                );
-              }.bind(this))}
-            </div>
-          </div>
-        </div>
+      </div>
     );
   }
 }
