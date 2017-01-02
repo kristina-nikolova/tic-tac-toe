@@ -2,13 +2,19 @@ import React, { Component } from 'react';
 import Header from './Header';
 import Announcement from './Announcement';
 import Board from './Board';
+import Score from './Score';
 
 class Game extends Component {
   constructor() {
       super();
       this.state = {
         winner: null,
-        gameOverMessage: 'Game over!'
+        gameOverMessage: 'Game over!',
+        score: {
+          playerScore: 0,
+          tiesScore: 0,
+          aiScore: 0
+        }
       }
 
       this.gameOverHandler = this.gameOverHandler.bind(this);
@@ -16,10 +22,15 @@ class Game extends Component {
   }
 
   gameOverHandler(winner, message) {
-      this.setState({
-        winner: winner,
-        gameOverMessage: message
-      });
+    this.setState({
+      winner: winner,
+      gameOverMessage: message,
+      score: {
+        playerScore: winner === 'x' ? this.state.score.playerScore + 1 : this.state.score.playerScore,
+        tiesScore: winner === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore,
+        aiScore: winner === 'o' ? this.state.score.aiScore + 1 : this.state.score.aiScore
+      }
+    });
   }
 
   /**
@@ -43,6 +54,7 @@ class Game extends Component {
                         message={this.state.gameOverMessage} />
           <Board gameOverHandler={this.gameOverHandler}
                  resetGameHandler={this.resetGameHandler} />
+          <Score score={this.state.score} />       
         </div>
       </div>
     );
