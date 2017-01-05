@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
 class Announcement extends Component {
-  /**
-   * @props winner
-   * @props message
-   */
   render() {
     return (
       <div className={this.props.winner ? 'visible' : 'invisible'}>
@@ -13,5 +9,10 @@ class Announcement extends Component {
     )
   }
 }
+
+Announcement.propTypes = {
+  winner: React.PropTypes.string,
+  message: React.PropTypes.string
+};
 
 export default Announcement;

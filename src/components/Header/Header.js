@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
-import logo from '../assets/logo.svg';
-import '../styles/components/Header.scss';
+import logo from '../../assets/logo.svg';
+import './Header.scss';
 
 class Header extends Component {
-  /**
-   * @props message
-   */
   render() {
     return (
       <div className="game__header">
@@ -15,5 +12,9 @@ class Header extends Component {
     )
   }
 }
+
+Header.propTypes = {
+  message: React.PropTypes.string
+};
 
 export default Header;

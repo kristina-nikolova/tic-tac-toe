@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
-import '../styles/components/Board.scss';
-import Tile from './Tile';
-import ResetButton from './ResetButton';
+import './Board.scss';
+import Tile from '../../components/Tile/Tile';
+import ResetButton from '../../components/ResetButton/ResetButton';
 
 class Board extends Component {
   /**
    * @props gameOverHandler()
    * @props resetGameHandler()
+   * @props loosingPlay
    */
   constructor(props) {
       super(props);
@@ -21,7 +22,8 @@ class Board extends Component {
         maxPlayer: 'x',
         minPlayer: 'o',
         gameOverMessage: 'Game over!',
-        winningPath: [null, null, null]
+        winningPath: [null, null, null],
+        firstMove: true
       }
   }
 
@@ -42,7 +44,8 @@ class Board extends Component {
         maxPlayer: 'x',
         minPlayer: 'o',
         gameOverMessage: 'Game over!',
-        winningPath: []
+        winningPath: [],
+        firstMove: true
       }, function(){
         this.props.resetGameHandler(this.state.winner, this.state.gameOverMessage);
       });
@@ -181,9 +184,12 @@ class Board extends Component {
    * @desc Find the best move for AI base on the miniMax algorithm
   */
   getAiMove(board) {
-    let bestMoveScore = 100;
+    let bestMoveScore = 10;
     let move = null;
     
+    /**
+    ** Check if game is over
+    **/
     if((this.winner(board, 'x') || this.winner(board, 'o') || this.tie(board))) {
       return null;
     }
@@ -197,13 +203,33 @@ class Board extends Component {
       ** If validMove returned a valid game board find the best move for AI (maxScore)
       **/
       if(newBoard) {
-        var moveScore = this.miniMaxAlgorithm(newBoard, false, true);
-        if (moveScore < bestMoveScore) {
-          bestMoveScore = moveScore;
-          move = i;
+        let moveScore = this.miniMaxAlgorithm(newBoard, false, true);
+
+        /**
+        ** If this game is loosing for the AI make a wrong first move
+        **/
+        if (this.props.loosingPlay && this.state.firstMove) {
+          if (moveScore >= bestMoveScore) {
+            bestMoveScore = moveScore;
+            move = i;
+          }
+        } else {
+          /**
+          ** If this game is not loosing for the AI make the best move
+          **/
+          if (moveScore <= bestMoveScore) {
+            bestMoveScore = moveScore;
+            move = i;
+          }
         }
       }
     }
+
+    console.log(this.props.loosingPlay);
+    if (this.props.loosingPlay && this.state.firstMove) {
+      this.setState({firstMove: false});
+    }
+    
     return move;
   }
 
@@ -222,7 +248,7 @@ class Board extends Component {
     } else if (this.tie(board)) {
       return 0;
     } else {
-      let bestMoveValue = max ? -100 : 100;
+      let bestMoveValue = max ? -10 : 10;
       let player = max ? this.state.maxPlayer : this.state.minPlayer;
 
       for (var i = 0; i < board.length; i++) {
@@ -295,5 +321,11 @@ class Board extends Component {
     );
   }
 }
+
+Board.propTypes = {
+  gameOverHandler: React.PropTypes.func,
+  resetGameHandler: React.PropTypes.func,
+  loosingPlay: React.PropTypes.bool
+};
 
 export default Board;

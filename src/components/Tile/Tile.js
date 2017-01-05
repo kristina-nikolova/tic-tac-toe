@@ -1,15 +1,7 @@
 import React, { Component } from 'react';
-import '../styles/components/Tile.scss';
+import './Tile.scss';
 
 class Tile extends Component {
-	/**
-   * @props loc
-   * @props value
-   * @props turn
-   * @props winningPath
-   * @props updateBoard()
-   */
-
   	handleTileClick(props) {
       /**
       ** Update board in the parent state when the player makes a move
@@ -28,5 +20,12 @@ class Tile extends Component {
 	  );
 	}
 }
+
+Tile.propTypes = {
+  loc: React.PropTypes.number,
+  value: React.PropTypes.string,
+  winningPath: React.PropTypes.array,
+  updateBoard: React.PropTypes.func
+};
 
 export default Tile;
