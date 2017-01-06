@@ -1,0 +1,30 @@
+.tile {
+    width: 100px;
+    height: 100px;
+    font-size: 60px;
+    display: inline-block;
+    float: left;
+    text-align: center;
+    line-height: 100px;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+    margin: 0 15px 15px 0;
+    transition: all .4s ease-in-out;
+
+    &:hover {
+      transition: box-shadow .25s;
+      box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    }
+}
+
+.tile--label {
+    margin: 0;
+    color: #757575;
+}
+
+.tile--winning {
+    .tile {
+        background: #C6EFFB;
+        color: #3F3E3E;
+        transition: all .6s ease-in-out;
+    }
+}
