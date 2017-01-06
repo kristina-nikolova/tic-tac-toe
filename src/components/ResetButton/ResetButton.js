@@ -1,16 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './ResetButton.scss';
 
-class ResetButton extends Component {
-  render() {
-    return (
-      <button className="button--reset" onClick={this.props.reset}>Reset</button>
-    )
-  }
-}
+const ResetButton = ({reset, winningPath}) => (
+    <button className="button--reset" onClick={reset}>Reset</button>
+);
 
 ResetButton.propTypes = {
-  reset: React.PropTypes.func,
+  reset: React.PropTypes.func.isRequired,
   winningPath: React.PropTypes.array
 };
 

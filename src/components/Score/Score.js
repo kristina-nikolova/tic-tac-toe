@@ -1,23 +1,19 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class Score extends Component {
-  render() {
-    return (
+const Score = ({score, level}) => (
+    <div>
+      <h2>Level {level}</h2>
       <div>
-        <h2>Level {this.props.level}</h2>
-        <div>
-          <div><span className="bold">Player:</span>{this.props.score.playerScore}</div>
-          <div><span className="bold">Ties:</span>{this.props.score.tiesScore}</div>
-          <div><span className="bold">Computer:</span>{this.props.score.aiScore}</div>
-        </div>
+        <div><span className="bold">Player:</span>{score.playerScore}</div>
+        <div><span className="bold">Ties:</span>{score.tiesScore}</div>
+        <div><span className="bold">Computer:</span>{score.aiScore}</div>
       </div>
-    )
-  }
-}
+    </div>
+);
 
 Score.propTypes = {
-  score: React.PropTypes.object,
-  level: React.PropTypes.number
+  score: React.PropTypes.object.isRequired,
+  level: React.PropTypes.number.isRequired
 };
 
 export default Score;

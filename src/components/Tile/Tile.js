@@ -22,10 +22,10 @@ class Tile extends Component {
 }
 
 Tile.propTypes = {
-  loc: React.PropTypes.number,
+  loc: React.PropTypes.number.isRequired,
   value: React.PropTypes.string,
   winningPath: React.PropTypes.array,
-  updateBoard: React.PropTypes.func
+  updateBoard: React.PropTypes.func.isRequired
 };
 
 export default Tile;

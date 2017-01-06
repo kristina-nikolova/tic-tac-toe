@@ -19,8 +19,6 @@ class Board extends Component {
         ],
         winner: null,
         currentPlayer: 'x',
-        maxPlayer: 'x',
-        minPlayer: 'o',
         gameOverMessage: 'Game over!',
         winningPath: [null, null, null],
         firstMove: true
@@ -41,8 +39,6 @@ class Board extends Component {
         ],
         winner: null,
         currentPlayer: 'x',
-        maxPlayer: 'x',
-        minPlayer: 'o',
         gameOverMessage: 'Game over!',
         winningPath: [],
         firstMove: true
@@ -198,7 +194,7 @@ class Board extends Component {
     ** Test Every Possible Move if the game is not already over.
     **/
     for(var i = 0; i < board.length; i++){
-      let newBoard = this.validMove(i, this.state.minPlayer, board);
+      let newBoard = this.validMove(i, this.props.aiPlayer, board);
       /**
       ** If validMove returned a valid game board find the best move for AI (maxScore)
       **/
@@ -224,8 +220,7 @@ class Board extends Component {
         }
       }
     }
-
-    console.log(this.props.loosingPlay);
+    
     if (this.props.loosingPlay && this.state.firstMove) {
       this.setState({firstMove: false});
     }
@@ -238,18 +233,18 @@ class Board extends Component {
    * @params board {Object}
    * @params min {Bool}
    * @params max {Bool}
-   * @desc 
+   * @desc X(player) is maxPlayer and O(ai) is minPlayer
   */
   miniMaxAlgorithm(board, min, max) {
-    if (this.winner(board, 'x')) {
+    if (this.winner(board, this.props.player)) {
       return 10;
-    } else if (this.winner(board, 'o')) {
+    } else if (this.winner(board, this.props.aiPlayer)) {
       return -10;
     } else if (this.tie(board)) {
       return 0;
     } else {
       let bestMoveValue = max ? -10 : 10;
-      let player = max ? this.state.maxPlayer : this.state.minPlayer;
+      let player = max ? this.props.player : this.props.aiPlayer;
 
       for (var i = 0; i < board.length; i++) {
         var newBoard = this.validMove(i, player, board);
@@ -323,9 +318,9 @@ class Board extends Component {
 }
 
 Board.propTypes = {
-  gameOverHandler: React.PropTypes.func,
-  resetGameHandler: React.PropTypes.func,
-  loosingPlay: React.PropTypes.bool
+  gameOverHandler: React.PropTypes.func.isRequired,
+  resetGameHandler: React.PropTypes.func.isRequired,
+  loosingPlay: React.PropTypes.bool.isRequired
 };
 
 export default Board;

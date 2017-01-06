@@ -2,12 +2,15 @@ import React, { Component } from 'react';
 import Header from '../../components/Header/Header';
 import Announcement from '../../components/Announcement/Announcement';
 import Score from '../../components/Score/Score';
+import SelectPlayer from '../../components/SelectPlayer/SelectPlayer';
 import Board from '../Board/Board';
 
 class Game extends Component {
   constructor() {
       super();
       this.state = {
+        player: 'x',
+        aiPlayer: 'o',
         winner: null,
         gameOverMessage: 'Game over!',
         score: {
@@ -70,7 +73,7 @@ class Game extends Component {
     }
 
     /**
-     * change the possibility of loosing game from AI
+     * change the possibility of loosing game from AI depends on the level
      */
     switch(this.state.level) {
     case 1:
@@ -88,8 +91,24 @@ class Game extends Component {
           loosingPlay:  false
         });
         break;
+    default:
+        break;    
     }
 
+  }
+
+  /**
+   * @name selectPlayer
+   * @params 
+   * @desc Change the player is user is select another option
+  */
+  selectPlayer(selectedPlayer) {
+    // if (selectedPlayer == 'o') {
+    //   this.setState({
+    //     player: 'o',
+    //     aiPlayer: 'x'
+    //   });
+    // }
   }
 
   render() {
@@ -97,9 +116,12 @@ class Game extends Component {
       <div className="App center">
         <Header message="Tic Tac Toe"/>
         <div>
+          <SelectPlayer selectPlayer={this.selectPlayer}/>
           <Announcement winner={this.state.winner} 
                         message={this.state.gameOverMessage} />
-          <Board gameOverHandler={this.gameOverHandler}
+          <Board player={this.state.player}
+                 aiPlayer={this.state.aiPlayer}
+                 gameOverHandler={this.gameOverHandler}
                  resetGameHandler={this.resetGameHandler}
                  loosingPlay={this.state.loosingPlay} />
           <Score score={this.state.score}
