@@ -69,6 +69,27 @@ class Game extends Component {
       });
     }
 
+    /**
+     * change the possibility of loosing game from AI
+     */
+    switch(this.state.level) {
+    case 1:
+        this.setState({
+          loosingPlay:  Math.random() >= 0.5
+        });
+        break;
+    case 2:
+        this.setState({
+          loosingPlay:  Math.random() > 0.8
+        });
+        break;
+    case 3:
+        this.setState({
+          loosingPlay:  false
+        });
+        break;
+    }
+
   }
 
   render() {
