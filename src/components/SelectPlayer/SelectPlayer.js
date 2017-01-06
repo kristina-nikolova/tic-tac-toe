@@ -11,11 +11,12 @@ class SelectPlayer extends Component {
     }
 
   	selectPlayerHandler(event) {
-      this.setState({selectedPlayer: event.target.value});
-      /**
-      ** Update player in the parent state
-      **/
-      this.props.selectPlayer(this.state.selectedPlayer);
+      this.setState({selectedPlayer: event.target.value}, function() {
+        /**
+        ** Update player in the parent state
+        **/
+        this.props.selectPlayer(this.state.selectedPlayer);
+      });
     }
 
 	render() {

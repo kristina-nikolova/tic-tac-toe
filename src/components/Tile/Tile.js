@@ -25,7 +25,7 @@ Tile.propTypes = {
   loc: React.PropTypes.number.isRequired,
   value: React.PropTypes.string,
   winningPath: React.PropTypes.array,
-  updateBoard: React.PropTypes.func.isRequired
+  updateBoardAfterPlayerMove: React.PropTypes.func.isRequired
 };
 
 export default Tile;
