@@ -6,7 +6,7 @@ class Tile extends Component {
       /**
       ** Update board in the parent state when the player makes a move
       **/
-      props.updateBoard(props.loc);
+      props.updateBoardAfterPlayerMove(props.loc);
     }
 
 	render() {

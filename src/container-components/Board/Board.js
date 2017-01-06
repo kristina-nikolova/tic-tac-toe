@@ -18,7 +18,6 @@ class Board extends Component {
           ' ',' ',' '
         ],
         winner: null,
-        currentPlayer: 'x',
         gameOverMessage: 'Game over!',
         winningPath: [null, null, null],
         firstMove: true
@@ -48,12 +47,12 @@ class Board extends Component {
   }
 
   /**
-   * @name winner
+   * @name isWinner
    * @params board {Object}
    * @params player {String}
-   * @desc Check for winner
+   * @desc Check if some player is a winner
   */
-  winner(board, player) {   
+  isWinner(board, player) {   
 
     if (    
            (board[0] === player && board[1] === player && board[2] === player) ||
@@ -103,11 +102,11 @@ class Board extends Component {
   */
   isGameOver(board, player) {
 
-    if (this.winner(board, player)) {
+    if (this.isWinner(board, player)) {
       this.setState({
         gameBoard: board,
         winner: player,
-        gameOverMessage: player === 'x' ? 'You win!' : 'You lose!'
+        gameOverMessage: player === this.props.player ? 'You win!' : 'You lose!'
       }, function() {
         /**
         ** Update winner and message in the parent state
@@ -145,15 +144,6 @@ class Board extends Component {
   }
 
   /**
-   * @name copyBoard
-   * @params board {Object}
-   * @desc Create a new version of the board to manipulate it
-  */
-  copyBoard(board) {
-    return board.slice(0);
-  }
-
-  /**
    * @name validMove
    * @params move {String}
    * @params player {String}
@@ -161,11 +151,14 @@ class Board extends Component {
    * @desc Determine if a move is valid and return the new board state
   */
   validMove(move, player, board) {
-    if((this.winner(board, 'x') || this.winner(board, 'o') || this.tie(board))) {
+    if((this.isWinner(board, 'x') || this.isWinner(board, 'o') || this.tie(board))) {
       return null;
     }
 
-    let newBoard = this.copyBoard(board);
+    /**
+     * Create a new version of the board to manipulate it
+     */
+    let newBoard = board.slice(0);
 
     if(newBoard[move] === ' '){
       newBoard[move] = player;
@@ -186,7 +179,7 @@ class Board extends Component {
     /**
     ** Check if game is over
     **/
-    if((this.winner(board, 'x') || this.winner(board, 'o') || this.tie(board))) {
+    if((this.isWinner(board, 'x') || this.isWinner(board, 'o') || this.tie(board))) {
       return null;
     }
 
@@ -236,9 +229,9 @@ class Board extends Component {
    * @desc X(player) is maxPlayer and O(ai) is minPlayer
   */
   miniMaxAlgorithm(board, min, max) {
-    if (this.winner(board, this.props.player)) {
+    if (this.isWinner(board, this.props.player)) {
       return 10;
-    } else if (this.winner(board, this.props.aiPlayer)) {
+    } else if (this.isWinner(board, this.props.aiPlayer)) {
       return -10;
     } else if (this.tie(board)) {
       return 0;
@@ -262,29 +255,26 @@ class Board extends Component {
   }
 
   /**
-   * @name updateBoard
+   * @name updateBoardAfterPlayerMove
    * @params move {String}
    * @desc Find AI move after every player move and update the board
   */
-  updateBoard(move) {
-    let player = this.state.currentPlayer;
-
+  updateBoardAfterPlayerMove(move) {
     /**
     ** Set player move and if no winner and it is valid change the turn
     **/
-    let currentGameBoard = this.validMove(move, player, this.state.gameBoard);
+    let currentGameBoard = this.validMove(move, this.props.player, this.state.gameBoard);
 
     if (currentGameBoard) {
-      this.isGameOver(currentGameBoard, player);
+      this.isGameOver(currentGameBoard, this.props.player);
 
       /**
       ** Set AI move and if no winner and it is valid update the state
       **/
-      player = 'o';
-      currentGameBoard = this.validMove(this.getAiMove(currentGameBoard), player, currentGameBoard);
+      currentGameBoard = this.validMove(this.getAiMove(currentGameBoard), this.props.aiPlayer, currentGameBoard);
 
       if (currentGameBoard) {
-        this.isGameOver(currentGameBoard, player);
+        this.isGameOver(currentGameBoard, this.props.aiPlayer);
 
         /**
         ** Update current state of the board
@@ -295,6 +285,18 @@ class Board extends Component {
       }  
     } 
   }
+
+  // makeFirstAiMove() {
+  //   let currentGameBoard = this.validMove(this.getAiMove(this.state.gameBoard), this.props.aiPlayer, this.state.gameBoard);
+
+  //   if (currentGameBoard) {
+  //       this.isGameOver(currentGameBoard, this.props.aiPlayer);
+
+  //       this.setState({
+  //         gameBoard: currentGameBoard
+  //       });
+  //   } 
+  // }
 
   render() {
     return (
@@ -308,7 +310,7 @@ class Board extends Component {
                   loc={i}
                   value={value}
                   winningPath={this.state.winningPath}
-                  updateBoard={this.updateBoard.bind(this)} />
+                  updateBoardAfterPlayerMove={this.updateBoardAfterPlayerMove.bind(this)} />
               );
             }.bind(this))}
           </div>
