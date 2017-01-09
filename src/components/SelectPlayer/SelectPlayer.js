@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import './SelectPlayer.scss';
 
 class SelectPlayer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          selectedPlayer: 'x'
+          selectedPlayer: ''
         }
 
         this.selectPlayerHandler = this.selectPlayerHandler.bind(this);
@@ -24,24 +25,20 @@ class SelectPlayer extends Component {
     const playerO = 'o';
 
 	  return (
-      <div>
-        <div className={this.props.showSelectPlayer ? '' : 'hidden'}>
-          Select player: 
-          <button value={playerX} 
-                  className={playerX === this.state.selectedPlayer ? 'red--border' : ''}
-                  onClick={this.selectPlayerHandler}>X</button>
-          <button value={playerO}
-                  className={playerO === this.state.selectedPlayer ? 'red--border' : ''}
-                  onClick={this.selectPlayerHandler}>O</button>
-        </div>
-        <div className={this.props.showSelectPlayer ? 'hidden' : ''}>You are the <span className="bold">{this.state.selectedPlayer}</span> player</div>
+      <div className='select-player__wrap center'>
+        <div>Select player:</div> 
+        <button value={playerX} 
+                className={'button button--select-player ' + (playerX === this.state.selectedPlayer ? 'selected' : '')}
+                onClick={this.selectPlayerHandler}>X</button>
+        <button value={playerO}
+                className={'button button--select-player ' + (playerO === this.state.selectedPlayer ? 'selected' : '')}
+                onClick={this.selectPlayerHandler}>O</button>
       </div>  
 	  );
 	}
 }
 
 SelectPlayer.propTypes = {
-  showSelectPlayer: React.PropTypes.bool.isRequired,
   selectPlayerHandler: React.PropTypes.func.isRequired
 };
 

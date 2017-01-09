@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Modal from 'react-modal';
 import Header from '../../components/Header/Header';
 import Announcement from '../../components/Announcement/Announcement';
 import Score from '../../components/Score/Score';
@@ -6,8 +7,22 @@ import SelectPlayer from '../../components/SelectPlayer/SelectPlayer';
 import ResetButton from '../../components/ResetButton/ResetButton';
 import Board from '../../components/Board/Board';
 
-const PLAYER_MOVES_COUNT_FOR_WIN = 1,
+const PLAYER_MOVES_COUNT_FOR_WIN = 2,
       ALL_MOVES_COUNT = 9;
+
+const modal = {
+  content : {
+    width                 : '350px',
+    height                : '150px',
+    top                   : '380px',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    padding               : '20px', 
+    transform             : 'translate(-50%, -50%)'
+  }
+};      
 
 class Game extends Component {
   constructor() {
@@ -30,8 +45,8 @@ class Game extends Component {
           aiScore: 0
         },
         loosingPlay: Math.random() >= 0.5,
-        level: 1, 
-        isBoardEmpty: true
+        level: 1,
+        modalIsOpen: true
       };
 
       this.selectPlayer = this.selectPlayer.bind(this);
@@ -55,20 +70,20 @@ class Game extends Component {
         winner: null,
         winningPath: [],
         gameOverMessage: 'Game over!',
-        isBoardEmpty: true
+      }, function() {
+        /**
+         * change level if user has 3 wins
+         * **/
+        this.changeLevelHandler();
+        this.openModal();
+        /**
+         * Ai makes the first move if the user is choose to be Player O
+         * **/
+        // if(this.state.aiPlayer === 'x') {
+        //   this.makeFirstAiMove();
+        // }
+        
       });
-
-      /**
-       * Ai makes the first move if the user is choose to be Player O
-       * **/
-      if(this.state.aiPlayer === 'x') {
-        this.makeFirstAiMove();
-      }
-
-      /**
-       * change level if user has 3 wins
-       * **/
-      this.changeLevelHandler();
   }
 
   /**
@@ -199,15 +214,6 @@ class Game extends Component {
     if((this.isWinner(board, 'x') || this.isWinner(board, 'o') || this.tie(board))) {
       return null;
     }
-
-    /**
-     * Something is eneter in the board
-     */
-     if (this.state.isBoardEmpty) {
-      this.setState({
-        isBoardEmpty: false
-      });
-     }
     
     /**
      * Create a new version of the board to manipulate it
@@ -229,7 +235,10 @@ class Game extends Component {
   getAiMove(board) {
     let bestMoveScore = 10;
     let move = null;
-    
+
+    let wrongPositions = [1, 3, 5, 7];
+    let wrongPosition = wrongPositions[Math.floor(Math.random() * wrongPositions.length)];
+
     /**
     ** Check if game is over
     **/
@@ -247,19 +256,35 @@ class Game extends Component {
       **/
       if(newBoard) {
         let moveScore = this.miniMaxAlgorithm(newBoard, false, true);
+        let filledTilesCount = newBoard.join('').replace(/ /g, '');
 
         /**
         ** If this game is loosing for the AI make a wrong first move
         **/
         if (this.state.loosingPlay && this.state.firstMove) {
+          /**
+          ** Wrong first move if the player is X
+          ** If the aiPlayer is second, bestMove can be 10
+          **/
           if (moveScore >= bestMoveScore) {
+            console.log('loosing + aiSecond');
             bestMoveScore = moveScore;
             move = i;
+          }
+
+          /**
+          ** Wrong first move if the player is O
+          ** If the aiPlayer is second, bestMove can not be 10 and we choose a random wrong position from an array
+          **/
+          if (filledTilesCount.length === 1 && this.state.aiPlayer === 'x') {
+            console.log('loosing + aiFirst');
+            move = wrongPosition;
           }
         } else {
           /**
           ** If this game is not loosing for the AI make the best move
           **/
+          console.log('regular game');
           if (moveScore <= bestMoveScore) {
             bestMoveScore = moveScore;
             move = i;
@@ -271,7 +296,6 @@ class Game extends Component {
     if (this.state.loosingPlay && this.state.firstMove) {
       this.setState({firstMove: false});
     }
-    
     return move;
   }
 
@@ -428,6 +452,24 @@ class Game extends Component {
   }
 
   /**
+   * @name openModal
+   * @params 
+   * @desc Open the modal for player selection
+  */
+  openModal() {
+    this.setState({modalIsOpen: true});
+  }
+
+  /**
+   * @name closeModal
+   * @params 
+   * @desc Close the modal after a  player is selected
+  */
+  closeModal() {
+    this.setState({modalIsOpen: false});
+  }
+
+  /**
    * @name selectPlayer
    * @params 
    * @desc Change the player is user is select another option
@@ -452,14 +494,7 @@ class Game extends Component {
           break;    
       }
 
-    // if (selectedPlayer === 'o') {
-    //   this.setState({
-    //     player: 'o',
-    //     aiPlayer: 'x'
-    //   }, function() {
-    //     this.makeFirstAiMove();
-    //   });
-    // }
+      this.closeModal();
   }
 
   render() {
@@ -473,11 +508,16 @@ class Game extends Component {
           <Board gameBoard={this.state.gameBoard}
                  winningPath={this.state.winningPath}
                  updateBoardAfterPlayerMove={this.updateBoardAfterPlayerMove} />
-           <SelectPlayer selectPlayerHandler={this.selectPlayer}
-                  showSelectPlayer={this.state.isBoardEmpty} />
           <Score score={this.state.score}
-                 level={this.state.level} />       
+                 level={this.state.level}
+                 player={this.state.player}
+                 aiPlayer={this.state.aiPlayer} />       
         </div>
+        <Modal isOpen={this.state.modalIsOpen}
+               style={modal}
+               contentLabel="Modal" >
+          <SelectPlayer selectPlayerHandler={this.selectPlayer} />
+        </Modal>
       </div>
     );
   }
