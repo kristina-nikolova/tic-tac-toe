@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './Board.scss';
 import Tile from '../../components/Tile/Tile';
 

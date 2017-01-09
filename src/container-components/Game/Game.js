@@ -6,6 +6,9 @@ import SelectPlayer from '../../components/SelectPlayer/SelectPlayer';
 import ResetButton from '../../components/ResetButton/ResetButton';
 import Board from '../../components/Board/Board';
 
+const PLAYER_MOVES_COUNT_FOR_WIN = 1,
+      ALL_MOVES_COUNT = 9;
+
 class Game extends Component {
   constructor() {
       super();
@@ -26,9 +29,14 @@ class Game extends Component {
           tiesScore: 0,
           aiScore: 0
         },
-        loosingPlay:  Math.random() >= 0.5,
-        level: 1
+        loosingPlay: Math.random() >= 0.5,
+        level: 1, 
+        isBoardEmpty: true
       };
+
+      this.selectPlayer = this.selectPlayer.bind(this);
+      this.resetBoard = this.resetBoard.bind(this);
+      this.updateBoardAfterPlayerMove = this.updateBoardAfterPlayerMove.bind(this);
   }
 
   /**
@@ -46,7 +54,8 @@ class Game extends Component {
         firstMove: true,
         winner: null,
         winningPath: [],
-        gameOverMessage: 'Game over!'
+        gameOverMessage: 'Game over!',
+        isBoardEmpty: true
       });
 
       /**
@@ -95,7 +104,7 @@ class Game extends Component {
     ** Set all not empty tiles into moves object
     **/
     let moves = board.join('').replace(/ /g, '');
-    if (moves.length === 9) {
+    if (moves.length === ALL_MOVES_COUNT) {
       return true;
     }
     return false;
@@ -119,10 +128,11 @@ class Game extends Component {
 
     if (this.isWinner(board, player)) {
 
-      let newGameOverMessage = player === this.state.player ? 'You win!' : 'You lose!';
-      let newPlayerScore = player === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore;
-      let newTiesScore = player === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore;
-      let newAiScore = player === this.state.aiPlayer ? this.state.score.aiScore + 1 : this.state.score.aiScore;
+      let newGameOverMessage = player === this.state.player ? 'You win!' : 'You lose!',
+          newPlayerScore = player === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore,
+          newTiesScore = player === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore,
+          newAiScore = player === this.state.aiPlayer ? this.state.score.aiScore + 1 : this.state.score.aiScore,
+          newLoosingPlay = this.getPossibilityOfLoosing(this.state.level);
 
       this.setState({
         gameBoard: board,
@@ -133,7 +143,7 @@ class Game extends Component {
           tiesScore: newTiesScore,
           aiScore: newAiScore
         },
-        loosingPlay:  Math.random() >= 0.5
+        loosingPlay: newLoosingPlay
       }, function() {
         /**
         ** Get winning path to highligh it
@@ -151,16 +161,18 @@ class Game extends Component {
       return;
     }
     if (this.tie(board)) {
+      let newLoosingPlay = this.getPossibilityOfLoosing(this.state.level);
+
       this.setState({
         gameBoard: board,
         winner: 'no winner',
         gameOverMessage: 'Game over!',
-        loosingPlay:  Math.random() >= 0.5
+        loosingPlay:  newLoosingPlay
       }, function() {
 
-        let newPlayerScore = this.state.winner === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore;
-        let newTiesScore = this.state.winner === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore;
-        let newAiScore = this.state.winner === this.state.aiPlayer ? this.state.score.aiScore + 1 : this.state.score.aiScore;
+        let newPlayerScore = this.state.winner === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore,
+            newTiesScore = this.state.winner === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore,
+            newAiScore = this.state.winner === this.state.aiPlayer ? this.state.score.aiScore + 1 : this.state.score.aiScore;
         
         this.setState({
           score: {
@@ -183,10 +195,20 @@ class Game extends Component {
    * @desc Determine if a move is valid and return the new board state
   */
   validMove(move, player, board) {
+    
     if((this.isWinner(board, 'x') || this.isWinner(board, 'o') || this.tie(board))) {
       return null;
     }
 
+    /**
+     * Something is eneter in the board
+     */
+     if (this.state.isBoardEmpty) {
+      this.setState({
+        isBoardEmpty: false
+      });
+     }
+    
     /**
      * Create a new version of the board to manipulate it
      */
@@ -336,12 +358,57 @@ class Game extends Component {
   }
 
   /**
+   * @name setPossibilityOfLoosing
+   * @params {Number} level
+   * @desc Change the possibility of loosing game from AI depends on the level
+  */
+  setPossibilityOfLoosing(level) {
+    switch(level) {
+      case 1:
+          this.setState({
+            loosingPlay:  Math.random() >= 0.5
+          });
+          break;
+      case 2:
+          this.setState({
+            loosingPlay:  Math.random() > 0.8
+          });
+          break;
+      case 3:
+          this.setState({
+            loosingPlay: false
+          });
+          break;
+      default:
+          break;    
+      }
+  }
+
+  /**
+   * @name getPossibilityOfLoosing
+   * @params {Number} level
+   * @desc Return the possibility of loosing game from AI
+  */
+  getPossibilityOfLoosing(level) {
+    switch(level) {
+      case 1:
+        return Math.random() >= 0.5;
+      case 2:
+        return Math.random() > 0.8;
+      case 3:
+        return false;
+      default:
+        break;    
+      }
+  }
+
+  /**
    * @name changeLevelHandler
    * @params 
    * @desc Change game level
   */
   changeLevelHandler() {
-    if (this.state.score.playerScore >= 1) {
+    if (this.state.score.playerScore === PLAYER_MOVES_COUNT_FOR_WIN) {
       this.setState({
         level: this.state.level + 1,
         score: {
@@ -349,32 +416,15 @@ class Game extends Component {
           tiesScore: 0,
           aiScore: 0
         }
+      }, function() {
+        /**
+        * update the possibility of loosing right after the level is changed
+        **/
+        this.setPossibilityOfLoosing(this.state.level);
       });
+    } else {
+      this.setPossibilityOfLoosing(this.state.level);
     }
-
-    /**
-     * change the possibility of loosing game from AI depends on the level
-     */
-    switch(this.state.level) {
-    case 1:
-        this.setState({
-          loosingPlay:  Math.random() >= 0.5
-        });
-        break;
-    case 2:
-        this.setState({
-          loosingPlay:  Math.random() > 0.8
-        });
-        break;
-    case 3:
-        this.setState({
-          loosingPlay:  false
-        });
-        break;
-    default:
-        break;    
-    }
-
   }
 
   /**
@@ -383,13 +433,33 @@ class Game extends Component {
    * @desc Change the player is user is select another option
   */
   selectPlayer(selectedPlayer) {
-    if (selectedPlayer === 'o') {
-      this.setState({
-        player: 'o',
-        aiPlayer: 'x'
-      });
-      this.makeFirstAiMove();
-    }
+     switch(selectedPlayer) {
+      case 'x':
+          this.setState({
+            player: 'x',
+            aiPlayer: 'o'
+          });
+          break;
+      case 'o':
+          this.setState({
+            player: 'o',
+            aiPlayer: 'x'
+          }, function() {
+            this.makeFirstAiMove();
+          });
+          break;
+      default:
+          break;    
+      }
+
+    // if (selectedPlayer === 'o') {
+    //   this.setState({
+    //     player: 'o',
+    //     aiPlayer: 'x'
+    //   }, function() {
+    //     this.makeFirstAiMove();
+    //   });
+    // }
   }
 
   render() {
@@ -397,14 +467,14 @@ class Game extends Component {
       <div className="App center">
         <Header message="Tic Tac Toe"/>
         <div>
-          <SelectPlayer selectPlayer={this.selectPlayer.bind(this)}/>
           <Announcement winner={this.state.winner} 
                         message={this.state.gameOverMessage} />
-          <ResetButton reset={this.resetBoard.bind(this)} 
-                       winningPath={this.state.winningPath} />
+          <ResetButton reset={this.resetBoard} />
           <Board gameBoard={this.state.gameBoard}
                  winningPath={this.state.winningPath}
-                 updateBoardAfterPlayerMove={this.updateBoardAfterPlayerMove.bind(this)} />
+                 updateBoardAfterPlayerMove={this.updateBoardAfterPlayerMove} />
+           <SelectPlayer selectPlayerHandler={this.selectPlayer}
+                  showSelectPlayer={this.state.isBoardEmpty} />
           <Score score={this.state.score}
                  level={this.state.level} />       
         </div>

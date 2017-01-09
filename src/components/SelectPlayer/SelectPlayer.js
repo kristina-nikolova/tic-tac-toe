@@ -15,22 +15,34 @@ class SelectPlayer extends Component {
         /**
         ** Update player in the parent state
         **/
-        this.props.selectPlayer(this.state.selectedPlayer);
+        this.props.selectPlayerHandler(this.state.selectedPlayer);
       });
     }
 
 	render() {
+    const playerX = 'x';
+    const playerO = 'o';
+
 	  return (
-      <select value={this.state.selectedPlayer} onChange={this.selectPlayerHandler}>
-        <option value="x">Player X</option>
-        <option value="o">Player O</option>
-      </select>
+      <div>
+        <div className={this.props.showSelectPlayer ? '' : 'hidden'}>
+          Select player: 
+          <button value={playerX} 
+                  className={playerX === this.state.selectedPlayer ? 'red--border' : ''}
+                  onClick={this.selectPlayerHandler}>X</button>
+          <button value={playerO}
+                  className={playerO === this.state.selectedPlayer ? 'red--border' : ''}
+                  onClick={this.selectPlayerHandler}>O</button>
+        </div>
+        <div className={this.props.showSelectPlayer ? 'hidden' : ''}>You are the <span className="bold">{this.state.selectedPlayer}</span> player</div>
+      </div>  
 	  );
 	}
 }
 
 SelectPlayer.propTypes = {
-  selectPlayer: React.PropTypes.func.isRequired
+  showSelectPlayer: React.PropTypes.bool.isRequired,
+  selectPlayerHandler: React.PropTypes.func.isRequired
 };
 
 export default SelectPlayer;
