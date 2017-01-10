@@ -1,6 +1,7 @@
 .gameHeader {
   background-color: #222;
   color: #fff;
+  height: 100px;
 }
 
 .headerTitle {
@@ -10,7 +11,8 @@
 
 .headerLogo {
   animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+  height: 90px;
+  margin-top: 5px;
   float: left;
 }
 

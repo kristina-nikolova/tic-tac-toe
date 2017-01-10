@@ -7,7 +7,7 @@ import SelectPlayer from '../../components/SelectPlayer/SelectPlayer';
 import ResetButton from '../../components/ResetButton/ResetButton';
 import Board from '../../components/Board/Board';
 
-const PLAYER_MOVES_COUNT_FOR_WIN = 2,
+const PLAYER_MOVES_COUNT_FOR_WIN = 1,
       ALL_MOVES_COUNT = 9;
 
 const modal = {
@@ -76,13 +76,6 @@ class Game extends Component {
          * **/
         this.changeLevelHandler();
         this.openModal();
-        /**
-         * Ai makes the first move if the user is choose to be Player O
-         * **/
-        // if(this.state.aiPlayer === 'x') {
-        //   this.makeFirstAiMove();
-        // }
-        
       });
   }
 
@@ -143,11 +136,17 @@ class Game extends Component {
 
     if (this.isWinner(board, player)) {
 
-      let newGameOverMessage = player === this.state.player ? 'You win!' : 'You lose!',
-          newPlayerScore = player === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore,
+      let newPlayerScore = player === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore,
           newTiesScore = player === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore,
           newAiScore = player === this.state.aiPlayer ? this.state.score.aiScore + 1 : this.state.score.aiScore,
           newLoosingPlay = this.getPossibilityOfLoosing(this.state.level);
+
+      let newGameOverMessage;
+      if (newPlayerScore === PLAYER_MOVES_COUNT_FOR_WIN) {
+        newGameOverMessage = 'You unlock the next level!';
+      } else {
+        newGameOverMessage = player === this.state.player ? 'You win!' : 'You lose!';
+      }
 
       this.setState({
         gameBoard: board,
@@ -499,7 +498,7 @@ class Game extends Component {
 
   render() {
     return (
-      <div className="App center">
+      <div className="center">
         <Header message="Tic Tac Toe"/>
         <div>
           <Announcement winner={this.state.winner} 

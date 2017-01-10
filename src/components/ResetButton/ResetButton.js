@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './ResetButton.scss';
 
 const ResetButton = ({reset}) => (
-    <button className={'button ' +  styles.buttonReset} onClick={reset}>Reset</button>
+    <button className={'button ' +  styles.buttonReset} onClick={reset}>New Game</button>
 );
 
 ResetButton.propTypes = {
