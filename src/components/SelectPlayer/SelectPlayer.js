@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './SelectPlayer.scss';
+import styles from './SelectPlayer.scss';
 
 class SelectPlayer extends Component {
     constructor(props) {
@@ -25,13 +25,13 @@ class SelectPlayer extends Component {
     const playerO = 'o';
 
 	  return (
-      <div className='select-player__wrap center'>
+  <div className={'center ' + styles.selectPlayerWrap}>
         <div>Select player:</div> 
         <button value={playerX} 
-                className={'button button--select-player ' + (playerX === this.state.selectedPlayer ? 'selected' : '')}
+                className={'button ' + styles.buttonSelectPlayer + (playerX === this.state.selectedPlayer ? ' selected' : ' ')}
                 onClick={this.selectPlayerHandler}>X</button>
         <button value={playerO}
-                className={'button button--select-player ' + (playerO === this.state.selectedPlayer ? 'selected' : '')}
+                className={'button ' + styles.buttonSelectPlayer + (playerO === this.state.selectedPlayer ? ' selected' : ' ')}
                 onClick={this.selectPlayerHandler}>O</button>
       </div>  
 	  );

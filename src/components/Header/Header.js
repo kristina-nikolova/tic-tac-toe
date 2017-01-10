@@ -1,11 +1,11 @@
 import React from 'react';
 import logo from '../../assets/logo.svg';
-import './Header.scss';
+import styles from './Header.scss';
 
 const Header = ({message}) => (
-    <div className="game__header">
-          <img src={logo} className="header__logo" alt="logo" />
-          <h1 className="header__title">{message}</h1>
+    <div className={styles.gameHeader}>
+          <img src={logo} className={styles.headerLogo} alt="logo" />
+          <h1 className={styles.headerTitle}>{message}</h1>
     </div>
 );
 

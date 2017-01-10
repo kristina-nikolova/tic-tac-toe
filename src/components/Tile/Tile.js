@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './Tile.scss';
+import styles from './Tile.scss';
 
 class Tile extends Component {
   	handleTileClick(props) {
@@ -11,10 +11,10 @@ class Tile extends Component {
 
 	render() {
 	  return (
-      <div className={this.props.winningPath.indexOf(this.props.loc) !== -1 ? 'tile--winning' : ''}>
-  	    <div className={"tile card " + this.props.loc} 
+      <div className={this.props.winningPath.indexOf(this.props.loc) !== -1 ? styles.tileWinning : ''}>
+  	    <div className={styles.tile + " card " + this.props.loc} 
              onClick={() => this.handleTileClick(this.props)}>
-  	      <p className="tile--label">{this.props.value}</p>
+  	      <p className={styles.tileLabel}>{this.props.value}</p>
   	    </div>
       </div>
 	  );
