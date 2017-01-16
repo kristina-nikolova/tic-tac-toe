@@ -7,7 +7,7 @@ import SelectPlayer from '../../components/SelectPlayer/SelectPlayer';
 import ResetButton from '../../components/ResetButton/ResetButton';
 import Board from '../../components/Board/Board';
 
-const PLAYER_MOVES_COUNT_FOR_WIN = 1,
+const PLAYER_MOVES_COUNT_FOR_WIN = 3,
       ALL_MOVES_COUNT = 9;
 
 const modal = {
@@ -232,11 +232,10 @@ class Game extends Component {
    * @desc Find the best move for AI base on the miniMax algorithm
   */
   getAiMove(board) {
-    let bestMoveScore = 10;
-    let move = null;
-
-    let wrongPositions = [1, 3, 5, 7];
-    let wrongPosition = wrongPositions[Math.floor(Math.random() * wrongPositions.length)];
+    let bestMoveScore = 10,
+        move = null,
+        loosingPositions = [1, 3, 5, 7],
+        winningPositions = [0, 2, 4, 6, 8];
 
     /**
     ** Check if game is over
@@ -246,53 +245,60 @@ class Game extends Component {
     }
 
     /**
-    ** Test Every Possible Move if the game is not already over.
+    ** Choose the first move form the predefined array when AI is first player
     **/
-    for(var i = 0; i < board.length; i++){
-      let newBoard = this.validMove(i, this.state.aiPlayer, board);
+    if (this.state.aiPlayer === 'x' && this.state.firstMove) {
+      if (this.state.loosingPlay) {
+        move = loosingPositions[Math.floor(Math.random() * loosingPositions.length)];
+      } else {
+        move = winningPositions[Math.floor(Math.random() * winningPositions.length)];
+      }
+    }
+
+    /**
+    ** Choose a move when AI is second player or it is not a first move
+    **/
+    if (this.state.aiPlayer === 'o' || (this.state.aiPlayer === 'x' && !this.state.firstMove)) {
       /**
-      ** If validMove returned a valid game board find the best move for AI (maxScore)
+      ** Test Every Possible Move if the game is not already over.
       **/
-      if(newBoard) {
-        let moveScore = this.miniMaxAlgorithm(newBoard, false, true);
-        let filledTilesCount = newBoard.join('').replace(/ /g, '');
-
+      for(var i = 0; i < board.length; i++){
+        let newBoard = this.validMove(i, this.state.aiPlayer, board);
         /**
-        ** If this game is loosing for the AI make a wrong first move
+        ** If validMove returned a valid game board find the best move for AI (maxScore)
         **/
-        if (this.state.loosingPlay && this.state.firstMove) {
-          /**
-          ** Wrong first move if the player is X
-          ** If the aiPlayer is second, bestMove can be 10
-          **/
-          if (moveScore >= bestMoveScore) {
-            console.log('loosing + aiSecond');
-            bestMoveScore = moveScore;
-            move = i;
-          }
+        if(newBoard) {
+          let moveScore = this.miniMaxAlgorithm(newBoard, false, true);
 
-          /**
-          ** Wrong first move if the player is O
-          ** If the aiPlayer is second, bestMove can not be 10 and we choose a random wrong position from an array
-          **/
-          if (filledTilesCount.length === 1 && this.state.aiPlayer === 'x') {
-            console.log('loosing + aiFirst');
-            move = wrongPosition;
-          }
-        } else {
-          /**
-          ** If this game is not loosing for the AI make the best move
-          **/
-          console.log('regular game');
-          if (moveScore <= bestMoveScore) {
-            bestMoveScore = moveScore;
-            move = i;
-          }
+            /**
+            ** If this game is loosing for the AI make a wrong first move
+            **/
+            if (this.state.loosingPlay && this.state.firstMove) {
+
+              /**
+              ** Wrong first move if the player is X
+              ** If the aiPlayer is second, bestMove can be 10
+              **/
+              if (moveScore >= bestMoveScore) {
+                console.log('loosing + aiSecond');
+                bestMoveScore = moveScore;
+                move = i;
+              }
+            } else {
+              /**
+              ** If this game is not loosing for the AI make the best move
+              **/
+              console.log('regular game');
+              if (moveScore <= bestMoveScore) {
+                bestMoveScore = moveScore;
+                move = i;
+              }
+            }
         }
       }
     }
     
-    if (this.state.loosingPlay && this.state.firstMove) {
+    if (this.state.firstMove) {
       this.setState({firstMove: false});
     }
     return move;
@@ -344,7 +350,6 @@ class Game extends Component {
 
     if (currentGameBoard) {
       this.isGameOver(currentGameBoard, this.state.player);
-
       /**
       ** Set AI move and if no winner and it is valid update the state
       **/
@@ -369,7 +374,8 @@ class Game extends Component {
    * @desc Ai makes a first move and the board is updated
   */
   makeFirstAiMove() {
-    let currentGameBoard = this.validMove(this.getAiMove(this.state.gameBoard), this.state.aiPlayer, this.state.gameBoard);
+    let currentAiMove = this.getAiMove(this.state.gameBoard);
+    let currentGameBoard = this.validMove(currentAiMove, this.state.aiPlayer, this.state.gameBoard);
 
     if (currentGameBoard) {
         this.isGameOver(currentGameBoard, this.state.aiPlayer);
