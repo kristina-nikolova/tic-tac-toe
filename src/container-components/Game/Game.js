@@ -34,6 +34,7 @@ class Game extends Component {
         ],
         player: 'x',
         aiPlayer: 'o',
+        selectedPlayer: '',
         firstMove: true,
         winner: null,
         winningPath: [null, null, null],
@@ -480,13 +481,15 @@ class Game extends Component {
       case 'x':
           this.setState({
             player: 'x',
-            aiPlayer: 'o'
+            aiPlayer: 'o',
+            selectedPlayer: 'x'
           });
           break;
       case 'o':
           this.setState({
             player: 'o',
-            aiPlayer: 'x'
+            aiPlayer: 'x',
+            selectedPlayer: 'o'
           }, function() {
             this.makeFirstAiMove();
           });
