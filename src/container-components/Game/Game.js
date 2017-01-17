@@ -6,9 +6,7 @@ import Score from '../../components/Score/Score';
 import SelectPlayer from '../../components/SelectPlayer/SelectPlayer';
 import ResetButton from '../../components/ResetButton/ResetButton';
 import Board from '../../components/Board/Board';
-
-const PLAYER_MOVES_COUNT_FOR_WIN = 3,
-      ALL_MOVES_COUNT = 9;
+import { gameConstants } from '../../constants/Game.constants';
 
 const modal = {
   content : {
@@ -22,9 +20,10 @@ const modal = {
     padding               : '20px', 
     transform             : 'translate(-50%, -50%)'
   }
-};      
+};
 
 class Game extends Component {
+
   constructor() {
       super();
       this.state = {
@@ -112,7 +111,7 @@ class Game extends Component {
     ** Set all not empty tiles into moves object
     **/
     let moves = board.join('').replace(/ /g, '');
-    if (moves.length === ALL_MOVES_COUNT) {
+    if (moves.length === gameConstants.ALL_MOVES_COUNT) {
       return true;
     }
     return false;
@@ -142,7 +141,7 @@ class Game extends Component {
           newLoosingPlay = this.getPossibilityOfLoosing(this.state.level);
 
       let newGameOverMessage;
-      if (newPlayerScore === PLAYER_MOVES_COUNT_FOR_WIN) {
+      if (newPlayerScore === gameConstants.PLAYER_MOVES_COUNT_FOR_WIN) {
         newGameOverMessage = 'You unlock the next level!';
       } else {
         newGameOverMessage = player === this.state.player ? 'You win!' : 'You lose!';
@@ -183,7 +182,9 @@ class Game extends Component {
         gameOverMessage: 'Game over!',
         loosingPlay:  newLoosingPlay
       }, function() {
-
+        /**
+        ** Update score in the callback because we changed the winner to 'no winner'
+        **/
         let newPlayerScore = this.state.winner === this.state.player ? this.state.score.playerScore + 1 : this.state.score.playerScore,
             newTiesScore = this.state.winner === 'no winner' ? this.state.score.tiesScore + 1 : this.state.score.tiesScore,
             newAiScore = this.state.winner === this.state.aiPlayer ? this.state.score.aiScore + 1 : this.state.score.aiScore;
@@ -234,8 +235,7 @@ class Game extends Component {
   getAiMove(board) {
     let bestMoveScore = 10,
         move = null,
-        loosingPositions = [1, 3, 5, 7],
-        winningPositions = [0, 2, 4, 6, 8];
+        positions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
     /**
     ** Check if game is over
@@ -246,13 +246,10 @@ class Game extends Component {
 
     /**
     ** Choose the first move form the predefined array when AI is first player
+    ** It is not needed to search a move recursive
     **/
     if (this.state.aiPlayer === 'x' && this.state.firstMove) {
-      if (this.state.loosingPlay) {
-        move = loosingPositions[Math.floor(Math.random() * loosingPositions.length)];
-      } else {
-        move = winningPositions[Math.floor(Math.random() * winningPositions.length)];
-      }
+      move = positions[Math.floor(Math.random() * positions.length)];
     }
 
     /**
@@ -264,23 +261,24 @@ class Game extends Component {
       **/
       for(var i = 0; i < board.length; i++){
         let newBoard = this.validMove(i, this.state.aiPlayer, board);
+
         /**
         ** If validMove returned a valid game board find the best move for AI (maxScore)
         **/
         if(newBoard) {
           let moveScore = this.miniMaxAlgorithm(newBoard, false, true);
+          let filledTilesCount = newBoard.join('').replace(/ /g, '');
 
             /**
             ** If this game is loosing for the AI make a wrong first move
             **/
-            if (this.state.loosingPlay && this.state.firstMove) {
+            if (this.state.loosingPlay && (filledTilesCount.length === gameConstants.LOOSING_MOVE_WHEN_PLAYER_IS_FIRST || filledTilesCount.length === gameConstants.LOOSING_MOVE_WHEN_PLAYER_IS_SECOND)) {
 
               /**
               ** Wrong first move if the player is X
               ** If the aiPlayer is second, bestMove can be 10
               **/
               if (moveScore >= bestMoveScore) {
-                console.log('loosing + aiSecond');
                 bestMoveScore = moveScore;
                 move = i;
               }
@@ -288,7 +286,6 @@ class Game extends Component {
               /**
               ** If this game is not loosing for the AI make the best move
               **/
-              console.log('regular game');
               if (moveScore <= bestMoveScore) {
                 bestMoveScore = moveScore;
                 move = i;
@@ -374,8 +371,7 @@ class Game extends Component {
    * @desc Ai makes a first move and the board is updated
   */
   makeFirstAiMove() {
-    let currentAiMove = this.getAiMove(this.state.gameBoard);
-    let currentGameBoard = this.validMove(currentAiMove, this.state.aiPlayer, this.state.gameBoard);
+    let currentGameBoard = this.validMove(this.getAiMove(this.state.gameBoard), this.state.aiPlayer, this.state.gameBoard);
 
     if (currentGameBoard) {
         this.isGameOver(currentGameBoard, this.state.aiPlayer);
@@ -437,7 +433,7 @@ class Game extends Component {
    * @desc Change game level
   */
   changeLevelHandler() {
-    if (this.state.score.playerScore === PLAYER_MOVES_COUNT_FOR_WIN) {
+    if (this.state.score.playerScore === gameConstants.PLAYER_MOVES_COUNT_FOR_WIN) {
       this.setState({
         level: this.state.level + 1,
         score: {
