@@ -57,7 +57,9 @@ class Game extends Component {
   /**
    * @name resetBoard
    * @params 
-   * @desc Reset the board
+   * @desc Reset board, winner and messages
+   * Change the level if needed
+   * Open a modal for selecting a player
   */
   resetBoard() {
       this.setState({
@@ -118,10 +120,17 @@ class Game extends Component {
     return false;
   }
 
-  checkForWinningPath(board, i1, i2, i3, player) {
-    if (board[i1] === player && board[i2] === player && board[i3] === player) {
+  /**
+   * @name checkForWinningPath
+   * @params board {Object}
+   * @params player {String}
+   * @desc Update winningPath when 3 tiles from the board are winning
+   * It is needed to highlight winning path
+  */
+  checkForWinningPath(board, tile1, tile2, tile3, player) {
+    if (board[tile1] === player && board[tile2] === player && board[tile3] === player) {
       this.setState({
-        winningPath: [i1, i2, i3]
+        winningPath: [tile1, tile2, tile3]
       });
     }
   }
@@ -131,6 +140,7 @@ class Game extends Component {
    * @params board {Object}
    * @params player {String}
    * @desc Check if game is over
+   * Update the score and If there is a winner set the winning path
   */
   isGameOver(board, player) {
 
@@ -260,7 +270,7 @@ class Game extends Component {
       /**
       ** Test Every Possible Move if the game is not already over.
       **/
-      for(var i = 0; i < board.length; i++){
+      for(let i = 0; i < board.length; i++){
         let newBoard = this.validMove(i, this.state.aiPlayer, board);
 
         /**
@@ -320,8 +330,8 @@ class Game extends Component {
       let bestMoveValue = max ? -10 : 10;
       let player = max ? this.state.player : this.state.aiPlayer;
 
-      for (var i = 0; i < board.length; i++) {
-        var newBoard = this.validMove(i, player, board);
+      for (let i = 0; i < board.length; i++) {
+        let newBoard = this.validMove(i, player, board);
         if (newBoard) {
           let predictedMoveValue = max ? this.miniMaxAlgorithm(newBoard, true, false) : this.miniMaxAlgorithm(newBoard, false, true);
           let condition = max ? predictedMoveValue > bestMoveValue : predictedMoveValue < bestMoveValue;
@@ -431,7 +441,7 @@ class Game extends Component {
   /**
    * @name changeLevelHandler
    * @params 
-   * @desc Change game level
+   * @desc Change game level when user is unlock it
   */
   changeLevelHandler() {
     if (this.state.score.playerScore === gameConstants.PLAYER_MOVES_COUNT_FOR_WIN) {
@@ -465,7 +475,7 @@ class Game extends Component {
   /**
    * @name closeModal
    * @params 
-   * @desc Close the modal after a  player is selected
+   * @desc Close the modal after a player is selected
   */
   closeModal() {
     this.setState({modalIsOpen: false});
@@ -474,7 +484,7 @@ class Game extends Component {
   /**
    * @name selectPlayer
    * @params 
-   * @desc Change the player is user is select another option
+   * @desc Change the player if user is select another option
   */
   selectPlayer(selectedPlayer) {
      switch(selectedPlayer) {
